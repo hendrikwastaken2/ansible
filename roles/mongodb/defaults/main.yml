@@ -1,0 +1,8 @@
+---
+# defaults file for mongodb role
+mongodb_version: "7.0"
+mongodb_package_version: "7.0.12"
+
+# Neue Variablen für die Konfiguration
+mongodb_repl_set_name: "rs01"
+mongodb_bind_ip: "127.0.0.1,{{ ansible_default_ipv4.address }}"
