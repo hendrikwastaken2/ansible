@@ -1,0 +1,25 @@
+---
+- name: Prepare all servers with common configuration
+  hosts: graylog_stack # Ziel: Alle Server des Stacks
+  become: yes
+  roles:
+    - common
+
+- name: Install and configure MongoDB
+  hosts: mongodb_servers # Ziel: Nur die MongoDB-Server
+  become: yes
+  roles:
+    - mongodb
+
+- name: Install and configure OpenSearch Data Node
+  hosts: opensearch_nodes # Ziel: Nur die Data Nodes
+  become: yes
+  roles:
+    - opensearch # (Diese Rolle müssten Sie als Nächstes erstellen)
+
+- name: Install and configure Graylog Server
+  hosts: graylog_servers # Ziel: Nur die Graylog-Server
+  become: yes
+  roles:
+    - graylog # (Diese Rolle müssten Sie als Nächstes erstellen)
+    
