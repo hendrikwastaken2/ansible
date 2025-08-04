@@ -1,0 +1,44 @@
+---
+- name: Bootstrap server for Ansible management
+  hosts: all
+  become: no # Wir führen die Aufgaben als der Login-Benutzer (root) aus
+  gather_facts: no # Fakten sind hier noch nicht nötig
+
+  vars:
+    # Der Name des Benutzers, den wir für Ansible anlegen wollen
+    ansible_user_to_create: ansible-admin
+
+    # Der öffentliche SSH-Schlüssel von Ihrer Control Node, der hinterlegt werden soll
+    # lookup('file', ...) liest den Inhalt der lokalen Datei auf Ihrer Control Node
+    ansible_public_key: "{{ lookup('file', '~/.ssh/ansible_key.pub') }}"
+
+  tasks:
+    - name: Create group for the ansible user
+      ansible.builtin.group:
+        name: "{{ ansible_user_to_create }}"
+        state: present
+
+    - name: Create the ansible user
+      ansible.builtin.user:
+        name: "{{ ansible_user_to_create }}"
+        group: "{{ ansible_user_to_create }}"
+        shell: /bin/bash
+        create_home: yes
+        state: present
+
+    - name: Grant the ansible user passwordless sudo privileges
+      ansible.builtin.copy:
+        content: "{{ ansible_user_to_create }} ALL=(ALL) NOPASSWD: ALL"
+        dest: "/etc/sudoers.d/{{ ansible_user_to_create }}"
+        owner: root
+        group: root
+        mode: '0440'
+        validate: /usr/sbin/visudo -csf %s
+
+    - name: Deploy the public SSH key for the ansible user
+      ansible.posix.authorized_key:
+        user: "{{ ansible_user_to_create }}"
+        key: "{{ ansible_public_key }}"
+        state: present
+        exclusive: yes # Entfernt alle anderen Keys aus der Datei
+        
