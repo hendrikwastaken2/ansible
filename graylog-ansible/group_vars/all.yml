@@ -1,0 +1,18 @@
+---
+# Global variables for the Graylog stack
+
+# --- MongoDB Settings ---
+# The hostname or IP where MongoDB is running.
+# This should be reachable from your Graylog Data Node and Server.
+graylog_mongodb_host: "127.0.0.1"
+
+# --- Data Node Settings ---
+# Set the heap size for the Data Node.
+# Recommended: half of system memory, up to a max of 31g.
+graylog_datanode_heap_size: "1g" # Adjust this to your server's RAM
+
+# --- Graylog Server Settings (used later) ---
+# This password_secret is generated randomly if not defined.
+# It's crucial that the Data Node and Graylog Server use the SAME secret.
+# Ansible ensures this by using the same variable.
+graylog_password_secret: "{{ lookup('password', '/dev/null length=64 chars=ascii_letters,digits') }}"
