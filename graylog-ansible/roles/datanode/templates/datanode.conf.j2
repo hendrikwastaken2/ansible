@@ -3,13 +3,33 @@
 
 # --- Graylog Integration Settings ---
 password_secret = {{ graylog_password_secret }}
-opensearch_heap = {{ graylog_datanode_heap_size }}
+# KORREKTUR: opensearch_heap_size statt opensearch_heap
+opensearch_heap_size = {{ graylog_datanode_heap_size }}
 mongodb_uri = mongodb://{{ graylog_mongodb_host }}:27017/graylog
+
+# --- Network Settings ---
+http_bind_address = 127.0.0.1:9200
 http_publish_uri = http://127.0.0.1:9200
 
 # --- Core OpenSearch Cluster Settings ---
-# These are required for the node to start and form a cluster.
 cluster.name = {{ graylog_cluster_name }}
 node.name = {{ graylog_node_name }}
-discovery.seed_hosts = ["127.0.0.1"]
+
+# --- Discovery Settings ---
+discovery.seed_hosts = ["127.0.0.1:9300"]
 cluster.initial_master_nodes = ["{{ graylog_node_name }}"]
+
+# --- Path Settings ---
+path.data = /var/lib/graylog-datanode/opensearch/data
+path.logs = /var/log/graylog-datanode
+
+# --- Security Settings (für Single-Node Setup) ---
+# Deaktiviert SSL für lokales Setup
+plugins.security.disabled = true
+
+# --- Node Roles ---
+node.roles = [data, master]
+
+# --- Performance Settings ---
+bootstrap.memory_lock = false
+action.auto_create_index = false
