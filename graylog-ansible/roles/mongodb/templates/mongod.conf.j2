@@ -6,8 +6,8 @@
 # Where and how to store data.
 storage:
   dbPath: /var/lib/mongodb
-  journal:
-    enabled: true
+  # The journal is enabled by default with the WiredTiger storage engine.
+  # The explicit 'journal' configuration block is no longer needed and causes errors.
 
 # where to write logging data.
 systemLog:
