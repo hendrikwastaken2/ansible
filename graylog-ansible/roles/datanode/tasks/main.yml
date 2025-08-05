@@ -27,6 +27,11 @@
     sysctl_file: /etc/sysctl.d/99-graylog-datanode.conf
     reload: yes
 
+- name: Ensure the graylog group exists
+  ansible.builtin.group:
+    name: graylog
+    state: present
+
 - name: Configure Data Node
   ansible.builtin.template:
     src: datanode.conf.j2
