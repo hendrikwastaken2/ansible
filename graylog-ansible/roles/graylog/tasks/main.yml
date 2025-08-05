@@ -1,0 +1,32 @@
+---
+# tasks file for graylog
+
+- name: Install Graylog Server package
+  ansible.builtin.apt:
+    name: graylog-server
+    state: present
+    update_cache: yes
+
+- name: Configure Graylog Server (server.conf)
+  ansible.builtin.template:
+    src: server.conf.j2
+    dest: /etc/graylog/server/server.conf
+    owner: root
+    group: graylog
+    mode: '0640'
+  notify: Restart graylog-server
+
+- name: Configure Graylog Java heap settings
+  ansible.builtin.template:
+    src: graylog-server.j2
+    dest: /etc/default/graylog-server
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart graylog-server
+
+- name: Ensure graylog-server service is enabled and started
+  ansible.builtin.service:
+    name: graylog-server
+    enabled: yes
+    state: started
