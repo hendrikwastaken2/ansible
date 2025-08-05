@@ -32,6 +32,14 @@
     name: graylog
     state: present
 
+- name: Ensure parent config directory has correct group permissions
+  ansible.builtin.file:
+    path: /etc/graylog
+    state: directory
+    owner: root
+    group: graylog
+    mode: '0770'
+
 - name: Ensure Data Node config directory exists with correct permissions
   ansible.builtin.file:
     path: /etc/graylog/datanode
