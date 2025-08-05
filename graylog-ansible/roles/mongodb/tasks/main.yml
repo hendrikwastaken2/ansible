@@ -1,0 +1,51 @@
+---
+# tasks file for mongodb
+
+- name: Install MongoDB prerequisites
+  ansible.builtin.apt:
+    name:
+      - gnupg
+      - curl
+    state: present
+    update_cache: yes
+
+- name: Add MongoDB GPG key
+  ansible.builtin.get_url:
+    url: https://www.mongodb.org/static/pgp/server-7.0.asc
+    dest: /etc/apt/trusted.gpg.d/mongodb-server-7.0.asc
+    mode: '0644'
+  # Note: The official docs use a dearmored key in /usr/share/keyrings.
+  # For simplicity and better compatibility with the apt_repository module,
+  # we place the ASCII-armored key directly where apt can find it.
+
+- name: Add MongoDB repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64,arm64 signed-by=/etc/apt/trusted.gpg.d/mongodb-server-7.0.asc] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse"
+    state: present
+    filename: mongodb-org-7.0
+    update_cache: yes
+
+- name: Install MongoDB packages
+  ansible.builtin.apt:
+    name: mongodb-org
+    state: present
+
+- name: Prevent MongoDB packages from being upgraded
+  ansible.builtin.dpkg_selections:
+    name: mongodb-org
+    selection: hold
+
+- name: Configure MongoDB
+  ansible.builtin.template:
+    src: mongod.conf.j2
+    dest: /etc/mongod.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart mongod
+
+- name: Ensure mongod service is enabled and started
+  ansible.builtin.service:
+    name: mongod
+    enabled: yes
+    state: started
