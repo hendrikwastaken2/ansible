@@ -5,11 +5,16 @@
 # The hostname or IP where MongoDB is running.
 graylog_mongodb_host: "127.0.0.1"
 
-# --- Data Node Settings ---
+# --- Data Node & Cluster Settings ---
 # Set the heap size for the Data Node. Recommended: half of system memory, up to 31g.
 graylog_datanode_heap_size: "1g" # Adjust this to your server's RAM
+# Name for the OpenSearch cluster used by the Data Node.
+graylog_cluster_name: "graylog"
+# Unique name for this specific Data Node.
+graylog_node_name: "graylog-node-1"
 
-# --- Graylog Server Settings (used later) ---
+
+# --- Graylog Server Settings ---
 #
 # DEBUGGING: Using a simple, hardcoded secret to rule out issues with password generation.
 #
