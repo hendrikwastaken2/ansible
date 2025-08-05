@@ -9,10 +9,11 @@
 - name: Install Graylog repository package
   ansible.builtin.apt:
     deb: /tmp/graylog-6.3-repository_latest.deb
-  notify: Apt update
 
-- name: Force handlers to run to update apt cache
-  ansible.builtin.meta: flush_handlers
+- name: Update apt cache after adding new repository
+  ansible.builtin.apt:
+    update_cache: yes
+  # This is run immediately to ensure the package is found in the next step.
 
 - name: Install Graylog Data Node package
   ansible.builtin.apt:
@@ -31,6 +32,13 @@
     name: graylog
     state: present
 
+- name: Stop graylog-datanode to break crash loop before fixing permissions
+  ansible.builtin.service:
+    name: graylog-datanode
+    state: stopped
+  # We ignore errors because the service might already be stopped or in a failed state.
+  ignore_errors: yes
+
 - name: Force ownership of all Graylog config directories (Recursive)
   ansible.builtin.file:
     path: /etc/graylog
@@ -39,7 +47,6 @@
     group: graylog
     mode: '0750'
     recurse: yes
-  notify: Restart graylog-datanode
 
 - name: Configure Data Node
   ansible.builtin.template:
@@ -48,9 +55,8 @@
     owner: graylog
     group: graylog
     mode: '0640'
-  notify: Restart graylog-datanode
 
-- name: Ensure graylog-datanode service is enabled and started
+- name: Enable and start graylog-datanode service
   ansible.builtin.service:
     name: graylog-datanode
     enabled: yes
