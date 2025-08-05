@@ -1,3 +1,4 @@
+---
 # tasks file for opensearch (Graylog Data Node)
 
 - name: Download Graylog repository package for version 6.3 (using wget)
@@ -30,6 +31,14 @@
   ansible.builtin.group:
     name: graylog
     state: present
+
+- name: Ensure Data Node config directory exists with correct permissions
+  ansible.builtin.file:
+    path: /etc/graylog/datanode
+    state: directory
+    owner: graylog
+    group: graylog
+    mode: '0750'
 
 - name: Configure Data Node
   ansible.builtin.template:
