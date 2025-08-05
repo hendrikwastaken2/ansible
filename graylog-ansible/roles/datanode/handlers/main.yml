@@ -1,0 +1,13 @@
+---
+# handlers file for opensearch (Graylog Data Node)
+
+- name: Restart graylog-datanode
+  ansible.builtin.service:
+    name: graylog-datanode
+    state: restarted
+
+# This handler is needed because installing the repository package
+# requires an apt update before other packages can be found.
+- name: Apt update
+  ansible.builtin.apt:
+    update_cache: yes
