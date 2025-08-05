@@ -1,0 +1,6 @@
+---
+# handlers file for graylog
+- name: Restart graylog-server
+  ansible.builtin.service:
+    name: graylog-server
+    state: restarted
