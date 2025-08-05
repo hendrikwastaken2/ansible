@@ -12,6 +12,9 @@
     deb: /tmp/graylog-6.3-repository_latest.deb
   notify: Apt update
 
+- name: Force handlers to run to update apt cache
+  ansible.builtin.meta: flush_handlers
+
 - name: Install Graylog Data Node package
   ansible.builtin.apt:
     name: graylog-datanode
