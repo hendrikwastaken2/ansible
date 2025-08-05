@@ -1,11 +1,11 @@
 ---
 # tasks file for opensearch (Graylog Data Node)
 
-- name: Download Graylog repository package for version 6.3
-  ansible.builtin.get_url:
-    url: https://packages.graylog2.org/repo/packages/graylog-6.3-repository_latest.deb
-    dest: /tmp/graylog-6.3-repository_latest.deb
-    mode: '0644'
+- name: Download Graylog repository package for version 6.3 (using wget)
+  ansible.builtin.command:
+    cmd: wget -O /tmp/graylog-6.3-repository_latest.deb https://packages.graylog2.org/repo/packages/graylog-6.3-repository_latest.deb
+    creates: /tmp/graylog-6.3-repository_latest.deb
+  # Using 'command' with 'creates' is more secure than 'shell' and ensures idempotency.
 
 - name: Install Graylog repository package
   ansible.builtin.apt:
