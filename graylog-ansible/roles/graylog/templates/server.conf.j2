@@ -5,6 +5,7 @@
 password_secret = {{ graylog_password_secret }}
 root_password_sha2 = {{ graylog_admin_password | password_hash('sha256') }}
 root_timezone = Europe/Berlin
+data_dir = /var/lib/graylog-server
 
 # --- HTTP Settings ---
 http_bind_address = {{ graylog_http_bind_address }}
