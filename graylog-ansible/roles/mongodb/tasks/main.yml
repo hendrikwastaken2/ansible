@@ -9,18 +9,17 @@
     state: present
     update_cache: yes
 
-- name: Add MongoDB GPG key
-  ansible.builtin.get_url:
-    url: https://www.mongodb.org/static/pgp/server-7.0.asc
-    dest: /etc/apt/trusted.gpg.d/mongodb-server-7.0.asc
-    mode: '0644'
-  # Note: The official docs use a dearmored key in /usr/share/keyrings.
-  # For simplicity and better compatibility with the apt_repository module,
-  # we place the ASCII-armored key directly where apt can find it.
+- name: Add MongoDB GPG key (using shell for robustness)
+  ansible.builtin.shell:
+    cmd: "curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor"
+  args:
+    creates: /usr/share/keyrings/mongodb-server-7.0.gpg
+  # 'creates' ensures this command only runs if the key file doesn't exist,
+  # making the task idempotent.
 
 - name: Add MongoDB repository
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64,arm64 signed-by=/etc/apt/trusted.gpg.d/mongodb-server-7.0.asc] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse"
+    repo: "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse"
     state: present
     filename: mongodb-org-7.0
     update_cache: yes
