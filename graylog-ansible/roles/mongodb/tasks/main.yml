@@ -1,21 +1,30 @@
 ---
 # tasks file for mongodb
 
-- name: Install MongoDB prerequisites
+- name: Install system prerequisites including Java
   ansible.builtin.apt:
     name:
       - gnupg
       - curl
+      - openjdk-21-jre-headless  # Java für Graylog
+      - net-tools                # für netstat debugging
     state: present
     update_cache: yes
+
+- name: Verify Java installation
+  ansible.builtin.command:
+    cmd: java -version
+  register: java_version
+  
+- name: Display Java version
+  ansible.builtin.debug:
+    msg: "Java installed: {{ java_version.stderr_lines[0] }}"
 
 - name: Add MongoDB GPG key (using shell for robustness)
   ansible.builtin.shell:
     cmd: "curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor"
   args:
     creates: /usr/share/keyrings/mongodb-server-7.0.gpg
-  # 'creates' ensures this command only runs if the key file doesn't exist,
-  # making the task idempotent.
 
 - name: Add MongoDB repository
   ansible.builtin.apt_repository:
@@ -48,3 +57,9 @@
     name: mongod
     enabled: yes
     state: started
+
+- name: Wait for MongoDB to be ready
+  ansible.builtin.wait_for:
+    port: 27017
+    host: 127.0.0.1
+    timeout: 30
