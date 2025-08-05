@@ -13,7 +13,6 @@
 - name: Update apt cache after adding new repository
   ansible.builtin.apt:
     update_cache: yes
-  # This is run immediately to ensure the package is found in the next step.
 
 - name: Install Graylog Data Node package
   ansible.builtin.apt:
@@ -32,11 +31,24 @@
     name: graylog
     state: present
 
+- name: Create necessary directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: graylog
+    group: graylog
+    mode: '0750'
+  loop:
+    - /var/lib/graylog-datanode
+    - /var/lib/graylog-datanode/opensearch
+    - /var/lib/graylog-datanode/opensearch/data
+    - /var/log/graylog-datanode
+    - /etc/graylog/datanode
+
 - name: Stop graylog-datanode to break crash loop before fixing permissions
   ansible.builtin.service:
     name: graylog-datanode
     state: stopped
-  # We ignore errors because the service might already be stopped or in a failed state.
   ignore_errors: yes
 
 - name: Force ownership of all Graylog config directories (Recursive)
@@ -48,6 +60,23 @@
     mode: '0750'
     recurse: yes
 
+- name: Ensure data directory ownership
+  ansible.builtin.file:
+    path: /var/lib/graylog-datanode
+    state: directory
+    owner: graylog
+    group: graylog
+    mode: '0750'
+    recurse: yes
+
+- name: Ensure log directory ownership
+  ansible.builtin.file:
+    path: /var/log/graylog-datanode
+    state: directory
+    owner: graylog
+    group: graylog
+    mode: '0750'
+
 - name: Configure Data Node
   ansible.builtin.template:
     src: datanode.conf.j2
@@ -55,9 +84,29 @@
     owner: graylog
     group: graylog
     mode: '0640'
+  notify: Restart graylog-datanode
 
-- name: Enable and start graylog-datanode service
+- name: Wait for MongoDB to be ready (if on same server)
+  ansible.builtin.wait_for:
+    port: 27017
+    host: "{{ graylog_mongodb_host }}"
+    timeout: 30
+  when: graylog_mongodb_host == "127.0.0.1" or graylog_mongodb_host == "localhost"
+
+- name: Enable graylog-datanode service
   ansible.builtin.service:
     name: graylog-datanode
     enabled: yes
+
+- name: Start graylog-datanode service
+  ansible.builtin.service:
+    name: graylog-datanode
     state: started
+
+- name: Wait for Data Node to be ready
+  ansible.builtin.wait_for:
+    port: 9200
+    host: 127.0.0.1
+    timeout: 60
+  retries: 3
+  delay: 10
