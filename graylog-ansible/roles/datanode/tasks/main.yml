@@ -5,7 +5,6 @@
   ansible.builtin.command:
     cmd: wget -O /tmp/graylog-6.3-repository_latest.deb https://packages.graylog2.org/repo/packages/graylog-6.3-repository_latest.deb
     creates: /tmp/graylog-6.3-repository_latest.deb
-  # Using 'command' with 'creates' is more secure than 'shell' and ensures idempotency.
 
 - name: Install Graylog repository package
   ansible.builtin.apt:
@@ -32,21 +31,15 @@
     name: graylog
     state: present
 
-- name: Ensure parent config directory has correct group permissions
+- name: Force ownership of all Graylog config directories (Recursive)
   ansible.builtin.file:
     path: /etc/graylog
-    state: directory
-    owner: root
-    group: graylog
-    mode: '0770'
-
-- name: Ensure Data Node config directory exists with correct permissions
-  ansible.builtin.file:
-    path: /etc/graylog/datanode
     state: directory
     owner: graylog
     group: graylog
     mode: '0750'
+    recurse: yes
+  notify: Restart graylog-datanode
 
 - name: Configure Data Node
   ansible.builtin.template:
