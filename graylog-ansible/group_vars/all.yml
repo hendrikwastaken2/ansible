@@ -9,9 +9,11 @@ graylog_mongodb_host: "127.0.0.1"
 # Set the heap size for the Data Node. Recommended: half of system memory, up to 31g.
 graylog_datanode_heap_size: "1g" # Adjust this to your server's RAM
 
-# --- Graylog Server Settings ---
-# This password_secret is generated randomly and shared with the Data Node.
-graylog_password_secret: "{{ lookup('password', '/dev/null length=64 chars=ascii_letters,digits') }}"
+# --- Graylog Server Settings (used later) ---
+#
+# DEBUGGING: Using a simple, hardcoded secret to rule out issues with password generation.
+#
+graylog_password_secret: "a_very_simple_hardcoded_secret_for_testing_purposes_12345678"
 
 # Set the password for the 'admin' user. This will be hashed automatically.
 # IMPORTANT: Change this to a secure password!
