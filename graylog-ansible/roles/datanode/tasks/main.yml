@@ -31,6 +31,16 @@
     name: graylog
     state: present
 
+- name: Ensure the graylog-datanode user exists (required by systemd service)
+  ansible.builtin.user:
+    name: graylog-datanode
+    group: graylog-datanode
+    system: yes
+    shell: /bin/false
+    home: /var/lib/graylog-datanode
+    create_home: no
+    state: present
+
 - name: Create necessary directories
   ansible.builtin.file:
     path: "{{ item }}"
@@ -60,21 +70,21 @@
     mode: '0750'
     recurse: yes
 
-- name: Ensure data directory ownership
+- name: Ensure data directory ownership (for graylog-datanode user)
   ansible.builtin.file:
     path: /var/lib/graylog-datanode
     state: directory
-    owner: graylog
-    group: graylog
+    owner: graylog-datanode
+    group: graylog-datanode
     mode: '0750'
     recurse: yes
 
-- name: Ensure log directory ownership
+- name: Ensure log directory ownership (for graylog-datanode user)
   ansible.builtin.file:
     path: /var/log/graylog-datanode
     state: directory
-    owner: graylog
-    group: graylog
+    owner: graylog-datanode
+    group: graylog-datanode
     mode: '0750'
 
 - name: Configure Data Node
