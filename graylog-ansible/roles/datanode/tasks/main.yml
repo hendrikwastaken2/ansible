@@ -1,0 +1,40 @@
+---
+# tasks file for opensearch (Graylog Data Node)
+
+- name: Download Graylog repository package for version 6.3
+  ansible.builtin.get_url:
+    url: https://packages.graylog2.org/repo/packages/graylog-6.3-repository_latest.deb
+    dest: /tmp/graylog-6.3-repository_latest.deb
+    mode: '0644'
+
+- name: Install Graylog repository package
+  ansible.builtin.apt:
+    deb: /tmp/graylog-6.3-repository_latest.deb
+  notify: Apt update
+
+- name: Install Graylog Data Node package
+  ansible.builtin.apt:
+    name: graylog-datanode
+    state: present
+
+- name: Set vm.max_map_count for Data Node
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    sysctl_file: /etc/sysctl.d/99-graylog-datanode.conf
+    reload: yes
+
+- name: Configure Data Node
+  ansible.builtin.template:
+    src: datanode.conf.j2
+    dest: /etc/graylog/datanode/datanode.conf
+    owner: root
+    group: graylog
+    mode: '0640'
+  notify: Restart graylog-datanode
+
+- name: Ensure graylog-datanode service is enabled and started
+  ansible.builtin.service:
+    name: graylog-datanode
+    enabled: yes
+    state: started
