@@ -1,5 +1,5 @@
 ---
-- name: Prepare Graylog Server
+- name: Install and configure Graylog stack
   hosts: all
   become: yes
 
@@ -8,3 +8,5 @@
       community.general.timezone:
         name: Europe/Berlin
 
+  roles:
+    - role: mongodb
