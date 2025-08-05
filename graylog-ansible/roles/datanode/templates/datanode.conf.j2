@@ -4,3 +4,6 @@
 password_secret = {{ graylog_password_secret }}
 opensearch_heap = {{ graylog_datanode_heap_size }}
 mongodb_uri = mongodb://{{ graylog_mongodb_host }}:27017/graylog
+
+# This setting is crucial for the Graylog Server to find and connect to the Data Node.
+http_publish_uri = http://127.0.0.1:9200
